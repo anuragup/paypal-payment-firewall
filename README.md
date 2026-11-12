@@ -56,6 +56,9 @@ git clone https://github.com/anuragup/paypal-payment-firewall.git && cd paypal-p
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env      # then fill it in, see below
+
+# Check the project works in one command, no credentials needed:
+python test_policy.py     # runs every rule in a few seconds
 ```
 
 ### 1. PayPal sandbox credentials
