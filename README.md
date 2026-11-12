@@ -122,8 +122,9 @@ This is a control on money, so the boundaries matter.
 - **Rules are enforced in code, not by a model.** Using a language model to decide
   whether a language model may move money would defeat the purpose. No prompt,
   however persuasive, changes what `policy.py` allows.
-- **Approvals are single-use and specific.** An approval covers one exact held
-  request and is consumed when that request goes through.
+- **Approvals are single-use and specific.** A refund approval covers one payment
+  and one amount, and is consumed when that refund goes through. A different
+  amount, or a second attempt, needs a new approval.
 - **Unknown is treated as risky.** A refund with no readable amount could be a full
   refund, so it is held and flagged, never waved through.
 - **The dashboard is for the account owner.** Set `DASHBOARD_PASSWORD` in `.env`
@@ -192,7 +193,7 @@ server can use it in place of PayPal's server. A typical client configuration:
 
 ## Limitations
 
-- An approval matches the exact request that was held. If an agent retries with different wording of the same refund, it is held again.
+- A refund approval matches on the capture and the amount. Approvals for other tools match the exact request, so a reworded retry of those is held again.
 - The access token is fetched when the proxy starts and lasts a few hours; restart the proxy for long sessions.
 - One PayPal account, one policy, one approver. There are no per-agent identities or budgets yet.
 - The dashboard's login is a single shared owner password, not individual accounts.

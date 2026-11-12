@@ -36,6 +36,14 @@ policy.set_status(held.log_id, "approved")
 d = policy.evaluate("create_refund", refund(30)); policy.set_status(d.log_id, "done")
 check("retried after approval", d, policy.ALLOW)
 
+h2 = policy.evaluate("create_refund", {"capture_id": "TESTCAPTURE000009", "amount": {"value": "25.00", "currency_code": "USD"}})
+check("another mid-size refund", h2, policy.HOLD)
+policy.set_status(h2.log_id, "approved")
+reworded = {"capture_id": "testcapture000009", "amount": "25", "note_to_payer": "Sorry!"}
+d = policy.evaluate("create_refund", reworded); policy.set_status(d.log_id, "done")
+check("approved refund retried with different wording", d, policy.ALLOW)
+check("approval does not cover a different amount",
+      policy.evaluate("create_refund", {"capture_id": "TESTCAPTURE000009", "amount": "26"}), policy.HOLD)
 check("approval is single-use", policy.evaluate("create_refund", refund(30)), policy.HOLD)
 
 for n in (15, 16, 17, 18):  # 10 + 30 + these = 106 > 100

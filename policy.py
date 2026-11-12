@@ -65,7 +65,20 @@ def set_frozen(on: bool) -> None:
 
 
 def fingerprint(tool: str, args: dict) -> str:
-    blob = json.dumps({"tool": tool, "args": args}, sort_keys=True)
+    """Identity of a request, used to match a retry to its approval.
+
+    For refunds this is the capture and the amount, so an agent that rewords
+    the same refund ("30" then "30.00", or adds a note) still matches, while a
+    different amount or a different payment never does.
+    """
+    if tool == "create_refund":
+        amount = amount_of(tool, args)
+        key = {"tool": tool,
+               "capture_id": str(args.get("capture_id", "")).strip().upper(),
+               "amount": None if amount is None else round(amount, 2)}
+    else:
+        key = {"tool": tool, "args": args}
+    blob = json.dumps(key, sort_keys=True)
     return hashlib.sha256(blob.encode()).hexdigest()[:16]
 
 
