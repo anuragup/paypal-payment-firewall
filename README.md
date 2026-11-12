@@ -109,7 +109,7 @@ Try these in the agent, with your capture ID:
 |---|---|
 | `Refund 5.00 USD for capture <ID>` | Allowed, refunded by PayPal |
 | `Refund 500.00 USD for capture <ID>` | Denied: over the per-action limit |
-| `Refund 30.00 USD for capture <ID>` | Held. Click **Approve** on the dashboard, then say `try that refund again` |
+| `Refund 30.00 USD for capture <ID>` | Held. Click **Approve** on the dashboard, then send the same request again |
 | Click **Freeze all payments**, then any refund | Denied: frozen |
 
 ## Security model
