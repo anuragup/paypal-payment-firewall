@@ -52,7 +52,7 @@ For each tool call the firewall returns one of three decisions:
 Requirements: Python 3.11+, Node.js 18+, a PayPal developer account.
 
 ```bash
-git clone <this repo> && cd <this repo>
+git clone https://github.com/anuragup/paypal-payment-firewall.git && cd paypal-payment-firewall
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env      # then fill it in, see below
