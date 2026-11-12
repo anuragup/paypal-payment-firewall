@@ -31,14 +31,25 @@ class FirewallMiddleware(Middleware):
         if decision.verdict == policy.HOLD:
             raise ToolError(f"Held by payment firewall. {decision.reason}")
 
+        # Forward the request in the exact shape PayPal expects.
+        context.message.arguments = policy.normalise(tool, args)
+
+        def give_back_approval():
+            # The call never succeeded, so the human's approval was not spent.
+            if decision.approval_id is not None:
+                policy.set_status(decision.approval_id, "approved")
+
         try:
             result = await call_next(context)
         except Exception as exc:
             policy.set_status(decision.log_id, "failed", str(exc)[:500])
+            give_back_approval()
             raise
         text = " ".join(getattr(p, "text", "") for p in getattr(result, "content", []) or [])
         failed = '"ok":false' in text.replace(" ", "")
         policy.set_status(decision.log_id, "failed" if failed else "done", text[:500])
+        if failed:
+            give_back_approval()
         return result
 
 

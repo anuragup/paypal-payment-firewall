@@ -27,6 +27,7 @@ class Decision:
     reason: str
     amount: float | None = None
     log_id: int | None = None
+    approval_id: int | None = None   # the human approval this decision used up, if any
 
 
 # ---------- storage ----------
@@ -149,6 +150,32 @@ def amount_of(tool: str, args: dict) -> float | None:
     return None
 
 
+def normalise(tool: str, args: dict) -> dict:
+    """Rewrite a request into the exact form PayPal expects.
+
+    Agents sometimes send a refund amount as "30", 30 or even a JSON string.
+    The firewall has already worked out what the amount is in order to judge
+    it, so it forwards that same value in the correct shape. What was checked
+    is what gets sent.
+    """
+    if tool != "create_refund":
+        return args
+    amount = amount_of(tool, args)
+    if amount is None:
+        return args
+    currency = "USD"
+    raw = args.get("amount")
+    if isinstance(raw, dict) and raw.get("currency_code"):
+        currency = str(raw["currency_code"]).upper()
+    else:
+        found = re.search(r"\b([A-Z]{3})\b", str(raw))
+        if found:
+            currency = found.group(1)
+    fixed = dict(args)
+    fixed["amount"] = {"value": f"{amount:.2f}", "currency_code": currency}
+    return fixed
+
+
 # ---------- the decision ----------
 
 def load_policy() -> dict:
@@ -205,7 +232,9 @@ def evaluate(tool: str, args: dict) -> Decision:
             ).fetchone()
         if prior and prior["status"] == "approved":
             set_status(prior["id"], "used")
-            return finish(ALLOW, f"Approved by a human (request #{prior['id']}).", "pending_call")
+            decision = finish(ALLOW, f"Approved by a human (request #{prior['id']}).", "pending_call")
+            decision.approval_id = prior["id"]
+            return decision
         if prior and prior["status"] == "rejected":
             set_status(prior["id"], "used")
             return finish(DENY, f"A human rejected this request (#{prior['id']}).", "done")

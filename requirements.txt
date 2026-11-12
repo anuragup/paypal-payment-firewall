@@ -3,4 +3,4 @@ python-dotenv
 pyyaml
 openai
 fastapi
-uvicorn
+uvicornpython agent.py
