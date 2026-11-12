@@ -1,0 +1,26 @@
+# Payment firewall policy.
+# Every PayPal tool call an agent makes is checked against these rules.
+# Tools not listed here follow `default`.
+
+default: allow          # read-only tools such as list_invoices, get_order
+
+rules:
+  create_refund:        # money leaving the business
+    max_amount: 50        # deny any single refund above this
+    approval_above: 20    # hold for a human between 20 and 50
+    daily_budget: 100     # deny once today's refunds would pass this
+
+  create_invoice:
+    max_amount: 500
+
+  create_order:
+    max_amount: 500
+
+  accept_dispute_claim:   # concedes a dispute and refunds the buyer
+    action: approval
+
+  cancel_subscription:
+    action: approval
+
+  update_plan:            # changes prices for every subscriber
+    action: deny

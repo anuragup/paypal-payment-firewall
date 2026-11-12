@@ -1,0 +1,6 @@
+fastmcp==4.1.8
+python-dotenv
+pyyaml
+openai
+fastapi
+uvicorn
